@@ -1,43 +1,44 @@
+
 # Audit Service Documentation
 
 ## Problem Statement
 **Implement the audit service for a microservices-based application**
 ### **Requirements:**
 1. **Subscribe to Change Notifications**
-   - The service listens for events from other microservices.
-   - Processes and stores them in a **standard format** in the database.
+    - The service listens for events from other microservices.
+    - Processes and stores them in a **standard format** in the database.
 
 2. **Audit Log APIs**
-   - **Admin**: Can view **all** audit messages.
-   - **Non-Admin**: Can view audit logs **only for accessible entities**.
+    - **Admin**: Can view **all** audit messages.
+    - **Non-Admin**: Can view audit logs **only for accessible entities**.
 
 3. **Log Rotation**
-   - Implement **configurable log rotation** to prevent excessive data growth.
+    - Implement **configurable log rotation** to prevent excessive data growth.
 
 4. **Spring Boot-based**
-   - The application must be developed using **Spring Boot**.
+    - The application must be developed using **Spring Boot**.
 
 5. **Deployment**
-   - Deploy as a **WAR file** in **Tomcat** on a **CentOS VM**.
+    - Deploy as a **WAR file** in **Tomcat** on a **CentOS VM**.
 
 ### **Design Considerations:**
 1. **Database Choice & Schema Design**
-   - Optimize for **performance** with indexing and partitioning.
+    - Optimize for **performance** with indexing and partitioning.
 
 2. **Audit Message Format**
-   - Standardize the JSON format for consistency.
+    - Standardize the JSON format for consistency.
 
 3. **Intra-service Communication**
-   - Use **Kafka** for event-driven logging.
+    - Use **Kafka** for event-driven logging.
 
 4. **Tamper-proofing**
-   - Implement **cryptographic hashing** to prevent log manipulation.
+    - Implement **cryptographic hashing** to prevent log manipulation.
 
 5. **Cross-platform Deployment**
-   - Ensure compatibility across **Linux**, **Windows**, and **cloud platforms**.
+    - Ensure compatibility across **Linux**, **Windows**, and **cloud platforms**.
 
 6. **Scalability**
-   - Design for **horizontal scaling** and **high availability**.
+    - Design for **horizontal scaling** and **high availability**.
 
 ---
 ## A Note from the Developer
@@ -60,11 +61,12 @@ The **Audit Service** is a microservice responsible for recording and storing au
 ---
 
 ## Design
+![Audit Service Design](design.png)
 
 Key Components
 1.	Producers (Microservices):
       •	Different services (Order Service, ATM Service, Food Service, Ticket Service) produce events.
-      •	In our current implementation, we have a single ```/housekeeping/logs``` API that sends log events to Kafka. However, this can be extended to support multiple event sources.
+      •	In our current implementation, we have a single ```/housekeeping/logs``` (for demo purpose) API that sends log events to Kafka. However, this can be extended to support multiple event sources.
 2.	Kafka & Topics:
       •	Messages are published to Kafka topic(s) (e.g., audit_topic).
       •	The diagram shows multiple topics for a broader perspective, but currently, we are using only one topic (audit_topic).
@@ -74,8 +76,6 @@ Key Components
 4.	Storage (MongoDB):
       •	Logs are stored in MongoDB for audit and retrieval purposes.
 
-Note
-•	This is a simplified design for illustration.
 ---
 ## JWT Authentication
 
@@ -147,23 +147,23 @@ Each log entry contains metadata, user information, request details, and a **dig
 #### JSON Structure
 ```json
 {
-   "_id": "ObjectId('67c813dc8079cf625dc671a7')",
-   "serviceName": "OrderService",
-   "eventType": "CREATE",
-   "auditTimestamp": "2025-03-05T09:05:32.117Z",
-   "userId": "user-123",
-   "userIp": "192.168.1.1",
-   "userRole": "USER",
-   "sourceService": "OrderService",
-   "requestId": "b2d85d5f-3856-4c7b-b282-4c69a07d8743",
-   "changes": {
-      "status": { "old": null, "new": "Created" },
-      "totalPrice": { "old": null, "new": 200 }
-   },
-   "metadata": { "traceId": "abcd-1234-xyz" },
-   "createdTimestamp": "2025-03-05T09:05:32.117Z",
-   "updatedTimestamp": "2025-03-05T09:05:32.117Z",
-   "signature": "Xs2+e7C..."
+  "_id": "ObjectId('67c813dc8079cf625dc671a7')",
+  "serviceName": "OrderService",
+  "eventType": "CREATE",
+  "auditTimestamp": "2025-03-05T09:05:32.117Z",
+  "userId": "user-123",
+  "userIp": "192.168.1.1",
+  "userRole": "USER",
+  "sourceService": "OrderService",
+  "requestId": "b2d85d5f-3856-4c7b-b282-4c69a07d8743",
+  "changes": {
+    "status": { "old": null, "new": "Created" },
+    "totalPrice": { "old": null, "new": 200 }
+  },
+  "metadata": { "traceId": "abcd-1234-xyz" },
+  "createdTimestamp": "2025-03-05T09:05:32.117Z",
+  "updatedTimestamp": "2025-03-05T09:05:32.117Z",
+  "signature": "Xs2+e7C..."
 }
 ```
 
@@ -385,153 +385,153 @@ You need to pass the userId of UserA (or any user whose log you are pushing) in 
 #### Let's try fetching logs for "ADMIN-USER" (which has admin privilege) we can see all the audit logs. The "userId" attribute is the differentiator
 ```json
 {
-    "content": [
-        {
-            "id": {
-                "timestamp": 1741165532,
-                "date": "2025-03-05T09:05:32.000+00:00"
-            },
-            "serviceName": "OrderService",
-            "eventType": "CREATE",
-            "auditTimestamp": "2025-03-05T09:05:32.117Z",
-            "userId": "user-123",
-            "userIp": "192.168.1.1",
-            "userRole": "USER",
-            "sourceService": "OrderService",
-            "requestId": "b2d85d5f-3856-4c7b-b282-4c69a07d8743",
-            "changes": {
-                "status": {
-                    "old": null,
-                    "new": "Created"
-                },
-                "totalPrice": {
-                    "old": null,
-                    "new": 200
-                }
-            },
-            "metadata": {
-                "traceId": "abcd-1234-xyz"
-            },
-            "createdTimestamp": "2025-03-05T09:05:32.117Z",
-            "updatedTimestamp": "2025-03-05T09:05:32.117Z",
-            "signature": "Xs2+e7CW6oDABrXb753Ts4Cr54RDBFuu2bx59UOgImZEgITiWx0OE1cA6Xm64s9yfkIpKXMVG5ZQhBbtGFc1beFPbpWvOuUYyV0DnD1ttpYlf90iO/oVakbyOlbCKAxZU//TRAXz/hTe4EEDW05TJVNi3ivJaFKSYCG1KE9VtKYGvw9b80FHLfWOtHxpVJQa8j/PY4FnFmrhz+V+NZscbBS8P7uMwVy5db7kJV7wyjE2/WQ8NDNnZ4n2r9QWhK0DGbrPijdJ34liMj0WxaR95WiRxsiH/cRBo2bKWFKHKDW43IVNpX4/xGjZPTlY/HbPdGlCrsqLcAZz2ferptjVkg=="
+  "content": [
+    {
+      "id": {
+        "timestamp": 1741165532,
+        "date": "2025-03-05T09:05:32.000+00:00"
+      },
+      "serviceName": "OrderService",
+      "eventType": "CREATE",
+      "auditTimestamp": "2025-03-05T09:05:32.117Z",
+      "userId": "user-123",
+      "userIp": "192.168.1.1",
+      "userRole": "USER",
+      "sourceService": "OrderService",
+      "requestId": "b2d85d5f-3856-4c7b-b282-4c69a07d8743",
+      "changes": {
+        "status": {
+          "old": null,
+          "new": "Created"
         },
-        {
-            "id": {
-                "timestamp": 1741165552,
-                "date": "2025-03-05T09:05:52.000+00:00"
-            },
-            "serviceName": "OrderService",
-            "eventType": "CREATE",
-            "auditTimestamp": "2025-03-05T09:05:52.355Z",
-            "userId": "userA",
-            "userIp": "192.168.1.1",
-            "userRole": "USER",
-            "sourceService": "OrderService",
-            "requestId": "b2d85d5f-3856-4c7b-b282-4c69a07d8743",
-            "changes": {
-                "status": {
-                    "old": null,
-                    "new": "Created"
-                },
-                "totalPrice": {
-                    "old": null,
-                    "new": 200
-                }
-            },
-            "metadata": {
-                "traceId": "abcd-1234-xyz"
-            },
-            "createdTimestamp": "2025-03-05T09:05:52.355Z",
-            "updatedTimestamp": "2025-03-05T09:05:52.355Z",
-            "signature": "mC0gWRQqxRm7HIshJTfDUeDyg340+pod0pDzMKPjock++hQCbbg+Duzr+OO2bQUELiHWo/g7/TDs0Ub2brdNP0fMVV2mLum8yNM5b0UPUCiiYXpCFZRj879niF1kmhBLMB426x7g7oiPjnq8zul5I80tAwxjqMkFKiFglU8qR/YBNsw2DU6N9DetEOWTmsP00SRDG+xH5CgeqPQT5RJpfZSboVhXs2tSTQjpQPibWIadENYtra1qxKhp4SoAB8BMzf8CJLEAwAPMDjxbTHVhsPaa0e8INZmFfrBuUvfsC+A4EC4QytCIfzKAjQrBAnJjMB/AmsWFPs8irv1naN4xmQ=="
-        },
-        {
-            "id": {
-                "timestamp": 1741165648,
-                "date": "2025-03-05T09:07:28.000+00:00"
-            },
-            "serviceName": "OrderService",
-            "eventType": "CREATE",
-            "auditTimestamp": "2025-03-05T09:07:28.116Z",
-            "userId": "userB",
-            "userIp": "192.168.1.1",
-            "userRole": "USER",
-            "sourceService": "OrderService",
-            "requestId": "b2d85d5f-3856-4c7b-b282-4c69a07d8743",
-            "changes": {
-                "status": {
-                    "old": null,
-                    "new": "Created"
-                },
-                "totalPrice": {
-                    "old": null,
-                    "new": 200
-                }
-            },
-            "metadata": {
-                "traceId": "abcd-1234-xyz"
-            },
-            "createdTimestamp": "2025-03-05T09:07:28.116Z",
-            "updatedTimestamp": "2025-03-05T09:07:28.116Z",
-            "signature": "fIxKcuenvgYuPqgA96anzPqCiSMlI14nDwX/6+2quIMuuLsbDEv3bHiBuUAGlDSaUGADmibXCpJwe15Lq+ADOuygQmtfW0TPf0LnPMsd/3i2ElT/A7/eLb4dpx0rdnMsvDVokpop65SqFQSrebKK9ftyzwbUriYcIgdnHPLHQZZ19N4PcnhAQenXiQCi9FLg5T1khvl/4kd0NqFQS0H6VhY+RYnCdHUu10mBOEkPxwobg5c3Vl0alguRVTYayIFxyOh16aIivEGpJqQc51RvWSoD0cccCCjoI5x7de75AQQ8NKV3baQF450VF/kRQVwNd+tvNp34mtPn91cnKVznGw=="
-        },
-        {
-            "id": {
-                "timestamp": 1741165666,
-                "date": "2025-03-05T09:07:46.000+00:00"
-            },
-            "serviceName": "OrderService",
-            "eventType": "CREATE",
-            "auditTimestamp": "2025-03-05T09:07:46.957Z",
-            "userId": "user-125",
-            "userIp": "192.168.1.1",
-            "userRole": "USER",
-            "sourceService": "OrderService",
-            "requestId": "b2d85d5f-3856-4c7b-b282-4c69a07d8743",
-            "changes": {
-                "status": {
-                    "old": null,
-                    "new": "Created"
-                },
-                "totalPrice": {
-                    "old": null,
-                    "new": 200
-                }
-            },
-            "metadata": {
-                "traceId": "abcd-1234-xyz"
-            },
-            "createdTimestamp": "2025-03-05T09:07:46.957Z",
-            "updatedTimestamp": "2025-03-05T09:07:46.957Z",
-            "signature": "QLgIsUBmsmICp1AFug85E0UHxc+ywnpNZvL6eKStqA6A3XzYWlELKLLkGn72jxsaK+eC0g+cRf1imjzYfkBA9nLLyrcpAMPfrulV1YzbleOl3N2ez1jnCuEz0E83nBxGboTUsHgnjQsgHTDlyixvHG3tYxRGIMiKsIKtVkop3IOpmAN8+C25Lfdvk+cdPCJWvn4mUcSPp7eZTtRF0kWwMbd78atFuPbGHQwAvCbVyXtig+NOxbQ4pkEE7BbothH4WWEOaoHKFiF/7FIKh9E9kFs5ayl2WPIfGZuMNB4JWldQqWfdUSBHs57mYwqJSy+92gEsHJIqq9t7APzEThlaLQ=="
+        "totalPrice": {
+          "old": null,
+          "new": 200
         }
-    ],
-    "pageable": {
-        "pageNumber": 0,
-        "pageSize": 10,
-        "sort": {
-            "empty": true,
-            "sorted": false,
-            "unsorted": true
+      },
+      "metadata": {
+        "traceId": "abcd-1234-xyz"
+      },
+      "createdTimestamp": "2025-03-05T09:05:32.117Z",
+      "updatedTimestamp": "2025-03-05T09:05:32.117Z",
+      "signature": "Xs2+e7CW6oDABrXb753Ts4Cr54RDBFuu2bx59UOgImZEgITiWx0OE1cA6Xm64s9yfkIpKXMVG5ZQhBbtGFc1beFPbpWvOuUYyV0DnD1ttpYlf90iO/oVakbyOlbCKAxZU//TRAXz/hTe4EEDW05TJVNi3ivJaFKSYCG1KE9VtKYGvw9b80FHLfWOtHxpVJQa8j/PY4FnFmrhz+V+NZscbBS8P7uMwVy5db7kJV7wyjE2/WQ8NDNnZ4n2r9QWhK0DGbrPijdJ34liMj0WxaR95WiRxsiH/cRBo2bKWFKHKDW43IVNpX4/xGjZPTlY/HbPdGlCrsqLcAZz2ferptjVkg=="
+    },
+    {
+      "id": {
+        "timestamp": 1741165552,
+        "date": "2025-03-05T09:05:52.000+00:00"
+      },
+      "serviceName": "OrderService",
+      "eventType": "CREATE",
+      "auditTimestamp": "2025-03-05T09:05:52.355Z",
+      "userId": "userA",
+      "userIp": "192.168.1.1",
+      "userRole": "USER",
+      "sourceService": "OrderService",
+      "requestId": "b2d85d5f-3856-4c7b-b282-4c69a07d8743",
+      "changes": {
+        "status": {
+          "old": null,
+          "new": "Created"
         },
-        "offset": 0,
-        "paged": true,
-        "unpaged": false
+        "totalPrice": {
+          "old": null,
+          "new": 200
+        }
+      },
+      "metadata": {
+        "traceId": "abcd-1234-xyz"
+      },
+      "createdTimestamp": "2025-03-05T09:05:52.355Z",
+      "updatedTimestamp": "2025-03-05T09:05:52.355Z",
+      "signature": "mC0gWRQqxRm7HIshJTfDUeDyg340+pod0pDzMKPjock++hQCbbg+Duzr+OO2bQUELiHWo/g7/TDs0Ub2brdNP0fMVV2mLum8yNM5b0UPUCiiYXpCFZRj879niF1kmhBLMB426x7g7oiPjnq8zul5I80tAwxjqMkFKiFglU8qR/YBNsw2DU6N9DetEOWTmsP00SRDG+xH5CgeqPQT5RJpfZSboVhXs2tSTQjpQPibWIadENYtra1qxKhp4SoAB8BMzf8CJLEAwAPMDjxbTHVhsPaa0e8INZmFfrBuUvfsC+A4EC4QytCIfzKAjQrBAnJjMB/AmsWFPs8irv1naN4xmQ=="
     },
-    "last": true,
-    "totalPages": 1,
-    "totalElements": 4,
-    "size": 10,
-    "number": 0,
+    {
+      "id": {
+        "timestamp": 1741165648,
+        "date": "2025-03-05T09:07:28.000+00:00"
+      },
+      "serviceName": "OrderService",
+      "eventType": "CREATE",
+      "auditTimestamp": "2025-03-05T09:07:28.116Z",
+      "userId": "userB",
+      "userIp": "192.168.1.1",
+      "userRole": "USER",
+      "sourceService": "OrderService",
+      "requestId": "b2d85d5f-3856-4c7b-b282-4c69a07d8743",
+      "changes": {
+        "status": {
+          "old": null,
+          "new": "Created"
+        },
+        "totalPrice": {
+          "old": null,
+          "new": 200
+        }
+      },
+      "metadata": {
+        "traceId": "abcd-1234-xyz"
+      },
+      "createdTimestamp": "2025-03-05T09:07:28.116Z",
+      "updatedTimestamp": "2025-03-05T09:07:28.116Z",
+      "signature": "fIxKcuenvgYuPqgA96anzPqCiSMlI14nDwX/6+2quIMuuLsbDEv3bHiBuUAGlDSaUGADmibXCpJwe15Lq+ADOuygQmtfW0TPf0LnPMsd/3i2ElT/A7/eLb4dpx0rdnMsvDVokpop65SqFQSrebKK9ftyzwbUriYcIgdnHPLHQZZ19N4PcnhAQenXiQCi9FLg5T1khvl/4kd0NqFQS0H6VhY+RYnCdHUu10mBOEkPxwobg5c3Vl0alguRVTYayIFxyOh16aIivEGpJqQc51RvWSoD0cccCCjoI5x7de75AQQ8NKV3baQF450VF/kRQVwNd+tvNp34mtPn91cnKVznGw=="
+    },
+    {
+      "id": {
+        "timestamp": 1741165666,
+        "date": "2025-03-05T09:07:46.000+00:00"
+      },
+      "serviceName": "OrderService",
+      "eventType": "CREATE",
+      "auditTimestamp": "2025-03-05T09:07:46.957Z",
+      "userId": "user-125",
+      "userIp": "192.168.1.1",
+      "userRole": "USER",
+      "sourceService": "OrderService",
+      "requestId": "b2d85d5f-3856-4c7b-b282-4c69a07d8743",
+      "changes": {
+        "status": {
+          "old": null,
+          "new": "Created"
+        },
+        "totalPrice": {
+          "old": null,
+          "new": 200
+        }
+      },
+      "metadata": {
+        "traceId": "abcd-1234-xyz"
+      },
+      "createdTimestamp": "2025-03-05T09:07:46.957Z",
+      "updatedTimestamp": "2025-03-05T09:07:46.957Z",
+      "signature": "QLgIsUBmsmICp1AFug85E0UHxc+ywnpNZvL6eKStqA6A3XzYWlELKLLkGn72jxsaK+eC0g+cRf1imjzYfkBA9nLLyrcpAMPfrulV1YzbleOl3N2ez1jnCuEz0E83nBxGboTUsHgnjQsgHTDlyixvHG3tYxRGIMiKsIKtVkop3IOpmAN8+C25Lfdvk+cdPCJWvn4mUcSPp7eZTtRF0kWwMbd78atFuPbGHQwAvCbVyXtig+NOxbQ4pkEE7BbothH4WWEOaoHKFiF/7FIKh9E9kFs5ayl2WPIfGZuMNB4JWldQqWfdUSBHs57mYwqJSy+92gEsHJIqq9t7APzEThlaLQ=="
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 10,
     "sort": {
-        "empty": true,
-        "sorted": false,
-        "unsorted": true
+      "empty": true,
+      "sorted": false,
+      "unsorted": true
     },
-    "first": true,
-    "numberOfElements": 4,
-    "empty": false
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "last": true,
+  "totalPages": 1,
+  "totalElements": 4,
+  "size": 10,
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": false,
+    "unsorted": true
+  },
+  "first": true,
+  "numberOfElements": 4,
+  "empty": false
 }
 ```
 #### 5.2 Fetch logs (Non-Admin) :
