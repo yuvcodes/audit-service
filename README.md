@@ -1,6 +1,6 @@
 # Audit Service Documentation
 
-## Problem Statement
+## Q. Problem Statement
 **Implement the audit service for a microservices-based application**
 ### **Requirements:**
 1. **Subscribe to Change Notifications**
@@ -263,7 +263,7 @@ The below endpoint can be used for both Admin user and non-Admin user.
 
 You need to pass the userId of UserA (or any user whose log you are pushing) in the request body, along with their JWT token in Authentication, to generate an audit log.
 
-#### Request Body: 
+#### Request Body:
 ```json
 {
   "serviceName": "OrderService",
@@ -580,6 +580,6 @@ Here are some of the key resources referred to while building this project:
 #### Auditing
 - [Auditing Basics](https://purusinha.medium.com/creating-a-audit-service-d430957e5f13)
 - [Building Audit Logs](https://medium.com/@tony.infisical/guide-to-building-audit-logs-for-application-software-b0083bb58604)
-- [Implementing Role-Based Security](https://medium.com/bluecore-engineering/implementing-role-based-security-in-a-web-app-89b66d1410e4)  
+- [Implementing Role-Based Security](https://medium.com/bluecore-engineering/implementing-role-based-security-in-a-web-app-89b66d1410e4)
 - [Spring Data JPA](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#auditing)
 - [Logging Cheat Sheet](https://www.owasp.org/index.php/Logging_Cheat_Sheet)  
