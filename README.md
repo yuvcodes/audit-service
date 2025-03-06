@@ -1,6 +1,6 @@
 # Audit Service Documentation
 
-## Q. Problem Statement
+## Problem Statement
 **Implement the audit service for a microservices-based application**
 ### **Requirements:**
 1. **Subscribe to Change Notifications**
@@ -63,7 +63,7 @@ The **Audit Service** is a microservice responsible for recording and storing au
 
 ### How JWT Works in This Project?
 1. **User logs in** → Backend verifies credentials.
-2. **JWT Token is issued** → Contains user roles & expiry.
+2. **JWT Token is issued** → Contains user details.
 3. **Client sends JWT with requests** → Backend verifies.
 4. **Role-based access** ensures only authorized users access logs.
 
@@ -541,15 +541,14 @@ The Audit Service is fully dockerized and can be easily deployed using Docker Co
 
 ### Steps to Run
 1.⁠ ⁠*Build the Project*
-⁠ sh
-mvn package -U
+⁠ 
+"mvn package -U"
     ⁠
 - ⁠ -U ⁠ forces update of dependencies.
 - The project is packaged as a JAR file instead of a WAR because Spring Boot applications run as standalone JARs.
 
 2.⁠ ⁠*Run with Docker Compose*
-⁠ sh
-docker-compose up --build
+⁠ "docker-compose up --build"
     ⁠
 - ⁠ --build ⁠ ensures the latest changes are included.
 - Docker orchestrates MongoDB, Kafka, and the Audit Service, ensuring all dependencies are correctly started.
@@ -576,10 +575,16 @@ Here are some of the key resources referred to while building this project:
 - [Spring Security Docs](https://spring.io/projects/spring-security)
 - [Kafka Official Documentation](https://kafka.apache.org/documentation/)
 - [JWT Authentication Guide](https://jwt.io/introduction/)
-
+- [Spring Boot Security JWT Authentication and Authorization Tutorial](https://www.javaguides.net/2024/01/spring-boot-security-jwt-tutorial.html)
 #### Auditing
 - [Auditing Basics](https://purusinha.medium.com/creating-a-audit-service-d430957e5f13)
 - [Building Audit Logs](https://medium.com/@tony.infisical/guide-to-building-audit-logs-for-application-software-b0083bb58604)
 - [Implementing Role-Based Security](https://medium.com/bluecore-engineering/implementing-role-based-security-in-a-web-app-89b66d1410e4)
 - [Spring Data JPA](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#auditing)
 - [Logging Cheat Sheet](https://www.owasp.org/index.php/Logging_Cheat_Sheet)  
+
+#### YouTube
+- [Kafka Tutorial for Beginners (Complete Playlist)](https://www.youtube.com/playlist?list=PLA3GkZPtsafbAjKYkhWnD6GdhRtm6JrD1)
+- [Apache Kafka Tutorials | Kafka 101](https://www.youtube.com/playlist?list=PLa7VYi0yPIH0KbnJQcMv5N9iW8HkZHztH)
+- [Spring security Telusko](https://www.youtube.com/watch?v=oeni_9g7too&t=1897s&pp=ygUcc3ByaW5nYm9vdCBzZWN1cml0eSBwbGF5bGlzdA%3D%3D)
+- [Spring Boot + Spring Security - Authentication & Authorization](https://www.youtube.com/watch?v=EN4Ldo4IZqY)
