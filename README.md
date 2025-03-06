@@ -4,40 +4,40 @@
 **Implement the audit service for a microservices-based application**
 ### **Requirements:**
 1. **Subscribe to Change Notifications**
-    - The service listens for events from other microservices.
-    - Processes and stores them in a **standard format** in the database.
+   - The service listens for events from other microservices.
+   - Processes and stores them in a **standard format** in the database.
 
 2. **Audit Log APIs**
-    - **Admin**: Can view **all** audit messages.
-    - **Non-Admin**: Can view audit logs **only for accessible entities**.
+   - **Admin**: Can view **all** audit messages.
+   - **Non-Admin**: Can view audit logs **only for accessible entities**.
 
 3. **Log Rotation**
-    - Implement **configurable log rotation** to prevent excessive data growth.
+   - Implement **configurable log rotation** to prevent excessive data growth.
 
 4. **Spring Boot-based**
-    - The application must be developed using **Spring Boot**.
+   - The application must be developed using **Spring Boot**.
 
 5. **Deployment**
-    - Deploy as a **WAR file** in **Tomcat** on a **CentOS VM**.
+   - Deploy as a **WAR file** in **Tomcat** on a **CentOS VM**.
 
 ### **Design Considerations:**
 1. **Database Choice & Schema Design**
-    - Optimize for **performance** with indexing and partitioning.
+   - Optimize for **performance** with indexing and partitioning.
 
 2. **Audit Message Format**
-    - Standardize the JSON format for consistency.
+   - Standardize the JSON format for consistency.
 
 3. **Intra-service Communication**
-    - Use **Kafka** for event-driven logging.
+   - Use **Kafka** for event-driven logging.
 
 4. **Tamper-proofing**
-    - Implement **cryptographic hashing** to prevent log manipulation.
+   - Implement **cryptographic hashing** to prevent log manipulation.
 
 5. **Cross-platform Deployment**
-    - Ensure compatibility across **Linux**, **Windows**, and **cloud platforms**.
+   - Ensure compatibility across **Linux**, **Windows**, and **cloud platforms**.
 
 6. **Scalability**
-    - Design for **horizontal scaling** and **high availability**.
+   - Design for **horizontal scaling** and **high availability**.
 
 ---
 ## A Note from the Developer
@@ -59,6 +59,24 @@ The **Audit Service** is a microservice responsible for recording and storing au
 
 ---
 
+## Design
+
+Key Components
+1.	Producers (Microservices):
+      •	Different services (Order Service, ATM Service, Food Service, Ticket Service) produce events.
+      •	In our current implementation, we have a single ```/housekeeping/logs``` API that sends log events to Kafka. However, this can be extended to support multiple event sources.
+2.	Kafka & Topics:
+      •	Messages are published to Kafka topic(s) (e.g., audit_topic).
+      •	The diagram shows multiple topics for a broader perspective, but currently, we are using only one topic (audit_topic).
+3.	Consumers (Audit Service):
+      •	The Audit Service subscribes to Kafka topics and consumes messages.
+      •	Right now, we have a single consumer, but more consumers can be added for scalability.
+4.	Storage (MongoDB):
+      •	Logs are stored in MongoDB for audit and retrieval purposes.
+
+Note
+•	This is a simplified design for illustration.
+---
 ## JWT Authentication
 
 ### How JWT Works in This Project?
@@ -119,6 +137,52 @@ Kafka is used for **asynchronous, distributed, and fault-tolerant event streamin
 - Uses **indexes** for fast retrieval.
 - Scalable and supports **high-throughput writes**.
 
+---
+
+## Audit Message Format
+
+The Audit Service logs every action performed in the system in a structured JSON format.  
+Each log entry contains metadata, user information, request details, and a **digital signature** for tamper-proofing.
+
+#### JSON Structure
+```json
+{
+   "_id": "ObjectId('67c813dc8079cf625dc671a7')",
+   "serviceName": "OrderService",
+   "eventType": "CREATE",
+   "auditTimestamp": "2025-03-05T09:05:32.117Z",
+   "userId": "user-123",
+   "userIp": "192.168.1.1",
+   "userRole": "USER",
+   "sourceService": "OrderService",
+   "requestId": "b2d85d5f-3856-4c7b-b282-4c69a07d8743",
+   "changes": {
+      "status": { "old": null, "new": "Created" },
+      "totalPrice": { "old": null, "new": 200 }
+   },
+   "metadata": { "traceId": "abcd-1234-xyz" },
+   "createdTimestamp": "2025-03-05T09:05:32.117Z",
+   "updatedTimestamp": "2025-03-05T09:05:32.117Z",
+   "signature": "Xs2+e7C..."
+}
+```
+
+| Field Name        | Data Type                          | Description |
+|------------------|----------------------------------|-------------|
+| `_id`           | `ObjectId`                        | Unique identifier of the log (MongoDB auto-generated). |
+| `serviceName`   | `String`                          | Name of the service generating the audit log. |
+| `eventType`     | `String`                          | Type of event (`CREATE`, `UPDATE`, `DELETE`, etc.). |
+| `auditTimestamp`| `ISODate`                         | Timestamp when the event occurred. |
+| `userId`        | `String`                          | ID of the user who triggered the event. |
+| `userIp`        | `String`                          | IP address of the user. |
+| `userRole`      | `String`                          | Role of the user (`ADMIN`, `USER`, etc.). |
+| `sourceService` | `String`                          | Microservice that generated the log. |
+| `requestId`     | `String` (UUID)                   | Unique ID for tracking the request across services. |
+| `changes`       | `Map<String, Map<String, Object>>`| Key-value pairs representing changed fields (`old` and `new` values). |
+| `metadata`      | `Map<String, String>`             | Additional metadata (e.g., `traceId` for tracing). |
+| `createdTimestamp` | `ISODate`                      | When the log was created in the database. |
+| `updatedTimestamp` | `ISODate`                      | When the log was last updated. |
+| `signature`     | `String`                          | Digital signature for tamper-proof verification. |
 ---
 
 ## API signatures
@@ -533,7 +597,14 @@ You need to pass the userId of UserA (or any user whose log you are pushing) in 
   "empty": false
 }
 ```
+---
+## Log Rotation in Audit Service
 
+To prevent excessive database growth, the `MongoLogRotationService` automatically **archives and deletes old audit logs** after a configurable retention period.
+
+- **Archival:** Older logs are saved as JSON files in an archive directory.
+- **Deletion:** Logs older than the retention period are deleted after archival.
+- **Scheduling:** Runs **daily at 2 AM** (configurable via cron).
 
 ---
 ## How to Run?
@@ -581,10 +652,11 @@ Here are some of the key resources referred to while building this project:
 - [Building Audit Logs](https://medium.com/@tony.infisical/guide-to-building-audit-logs-for-application-software-b0083bb58604)
 - [Implementing Role-Based Security](https://medium.com/bluecore-engineering/implementing-role-based-security-in-a-web-app-89b66d1410e4)
 - [Spring Data JPA](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#auditing)
-- [Logging Cheat Sheet](https://www.owasp.org/index.php/Logging_Cheat_Sheet)  
+- [Logging Cheat Sheet](https://www.owasp.org/index.php/Logging_Cheat_Sheet)
 
 #### YouTube
 - [Kafka Tutorial for Beginners (Complete Playlist)](https://www.youtube.com/playlist?list=PLA3GkZPtsafbAjKYkhWnD6GdhRtm6JrD1)
 - [Apache Kafka Tutorials | Kafka 101](https://www.youtube.com/playlist?list=PLa7VYi0yPIH0KbnJQcMv5N9iW8HkZHztH)
 - [Spring security Telusko](https://www.youtube.com/watch?v=oeni_9g7too&t=1897s&pp=ygUcc3ByaW5nYm9vdCBzZWN1cml0eSBwbGF5bGlzdA%3D%3D)
 - [Spring Boot + Spring Security - Authentication & Authorization](https://www.youtube.com/watch?v=EN4Ldo4IZqY)
+
