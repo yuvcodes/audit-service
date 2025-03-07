@@ -275,7 +275,7 @@ First, log in (refer the second endpoint above) using the Super Admin credential
 
 Let's create an admin with the JWT of superAdmin...
 #### Endpoint: ```POST http://localhost:8080/admins```
-
+#### Authentication - ```Bearer Token (JWT)```
 #### Request Header: ```Content-Type: application/json```
 
 #### Request Body:
@@ -379,7 +379,8 @@ You need to pass the userId of UserA (or any user whose log you are pushing) in 
 }
 ```
 ### 5. Fetch Logs
-#### Endpoint: GET http://localhost:8080/audit/logs
+#### Endpoint: GET ```http://localhost:8080/audit/logs```
+#### Authentication - ```Bearer Token (JWT)```
 
 #### 5.1 Fetch all logs (Admin) :
 #### Let's try fetching logs for "ADMIN-USER" (which has admin privilege) we can see all the audit logs. The "userId" attribute is the differentiator
