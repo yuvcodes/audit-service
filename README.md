@@ -661,5 +661,6 @@ Here are some of the key resources referred to while building this project:
 - [Spring security Telusko](https://www.youtube.com/watch?v=oeni_9g7too&t=1897s&pp=ygUcc3ByaW5nYm9vdCBzZWN1cml0eSBwbGF5bGlzdA%3D%3D)
 - [Spring Boot + Spring Security - Authentication & Authorization](https://www.youtube.com/watch?v=EN4Ldo4IZqY)
 
+---
 ✨ **Give this repo a star if it helps you!**  
 🔗 [Connect on Twitter](https://x.com/bansal_yuv) | 🤝 Let’s grow in tech together!
